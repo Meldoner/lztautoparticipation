@@ -251,6 +251,7 @@ def work():
 
 	if config.auto_start == 1:
 		print('Работа завершена! Запуск скрипта снова через ' + str(config.waiting) + ' минут.')
+		print('Сейчас - ' + time.strftime("%H:%M", time.gmtime()))
 	else:
 		print('Работа окончена! Программа будет закрыта через 2 секунды.')
 
