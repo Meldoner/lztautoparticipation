@@ -272,12 +272,14 @@ try:
 except:
 	print('Неверные значения в config.py')
 	time.sleep(3)
+	sys.exit()
 
-if auto_start == 1:
-	while True:
+
+while auto_start == 1:
 		work()
 		time.sleep(waiting)
-else:
+	
+if auto_start == 0:
 	work()
 	sys.exit()
 
