@@ -274,15 +274,14 @@ except:
 	time.sleep(3)
 	sys.exit()
 
-
-while auto_start == 1:
-		work()
-		time.sleep(waiting)
-	
 if auto_start == 0:
 	work()
 	sys.exit()
 
+
+while auto_start == 1:
+		work()
+		time.sleep(waiting)
 
 
 
