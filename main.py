@@ -118,7 +118,7 @@ def work():
 		driver.execute_script("window.open('');")
 		driver.switch_to.window(driver.window_handles[1])
 		driver.get(goto)
-		print("Розыгрыш : %s" %driver.title)
+		print("%s" %driver.title)
 
 		time.sleep(0.05)
 
@@ -135,18 +135,18 @@ def work():
 		if cheks == True:
 
 			def check_work():
-				work_check = 0
 				try:
-					driver.find_element_by_class_name('LztContest--alreadyParticipating')
+					driver.find_element_by_class_name('LztContest--alreadyParticipating hidden')
 				except NoSuchElementException:
-					work_check = 0
-				work_check = 1
+					work_check = 1
+				work_check = 0
 
 				if work_check == 1:
 					print('Капча введена успешно!\n')
+					return True
 				else:
 					print('Капча не верна! Пробую ещё раз.\n')
-					captcha_solution()
+					return False
 
 			def captcha_solution():
 
@@ -217,6 +217,10 @@ def work():
 					result = a + b
 					print('Ответ: ' + str(result) + '\n')
 
+				else:
+					print('Не удалось считать капчу')
+					result = 0
+
 				time.sleep(0.01)
 
 				driver.find_element_by_name('captcha_question_answer').send_keys(result)
@@ -228,11 +232,21 @@ def work():
 				os.remove('captchax2.5.jpg')
 				time.sleep(0.3)
 
-				global work_check
+				try:
+					driver.find_element_by_class_name('LztContest--alreadyParticipating hidden')
+				except:
+					return True
+				return False
 				
-				check_work()
 
-			captcha_solution()
+			try_again = captcha_solution()
+
+			if try_again == False:
+				print('Капча не верна! Пробую ещё раз.\n')
+				captcha_solution()
+			else:
+				print('Капча успешно введена!\n')
+				pass
 
 
 			driver.close()
