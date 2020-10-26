@@ -5,6 +5,7 @@
 ### Инструкция:
 1. Для работы программы у вас должен быть установлен [Chrome Browser](https://www.google.com/intl/ru/chrome/).
 2. У вас должен быть установлен [Python 3.8.6](https://www.python.org/downloads/release/python-386/) и pip, а так же ```pip3 install requests pytesseract selenium opencv-python pillow```.
+4. Необходимо распаковать файл Tesseract-OCR.zip.
 3. Для работы программы необходимо вставить Cookie в формате json с [lolz.guru](https://lolz.guru) в файл cookie.txt (Можно использовать [EditThisCookie](https://bit.ly/EditThisCookielzt)).
 4. + Для Windows: Запустить двойным нажатием файл main.py
    + Для Linux: Программа пока не работает на Linux. В скором времени планируется добавить поддержку Linux.
