@@ -16,6 +16,8 @@ import json
 import config
 
 
+print('Версия: 0.03')
+
 try:
 	waiting = config.waiting * 60
 	auto_start = config.auto_start
