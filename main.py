@@ -44,6 +44,7 @@ def work():
 
 
 	options = Options()
+	options.add_argument('--headless')
 	options.add_argument('--log-level=3')
 	driver = webdriver.Chrome(chrome_options=options, executable_path=r'chromedriver.exe')
 	os.system("cls")
@@ -107,6 +108,7 @@ def work():
 		print('Нет розыгрышей, в которых вы можете участвовать!')
 	else:
 		print('Список готов! Начинаю участвовать!\n')
+
 	h = 0
 	already = 0
 	time.sleep(0.3)
@@ -128,20 +130,6 @@ def work():
 
 
 		if cheks == True:
-
-			def check_work():
-				try:
-					driver.find_element_by_class_name('LztContest--alreadyParticipating hidden')
-				except NoSuchElementException:
-					work_check = 1
-				work_check = 0
-
-				if work_check == 1:
-					print('Капча введена успешно!\n')
-					return True
-				else:
-					print('Капча не верна! Пробую ещё раз.\n')
-					return False
 
 			def captcha_solution():
 
@@ -222,28 +210,23 @@ def work():
 
 				driver.find_element_by_class_name('LztContest--Participate').click()
 
-					
 				
-				time.sleep(2)
+				time.sleep(0.3)
 
 
 				try:
-					driver.find_element_by_css_selector('div.baseHtml.errorDetails')
+					driver.find_element_by_css_selector('span.LztContest--alreadyParticipating.button.marginBlock.alreadyParticipate.disabled')
 				except NoSuchElementException:
-					return True
-				return False
+					return False
+				return True
 				
 
 			try_again = captcha_solution()
 
 			if try_again == False:
-				print('Капча не верна! Пробую ещё раз.\n')
-				driver.find_element_by_class_name('OverlayCloser').click()
-				captcha_solution()
+				print('Не удалось распознать капчу.\n')
 			else:
 				print('Капча успешно введена!\n')
-				pass
-
 
 
 			h = h + 1
