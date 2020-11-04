@@ -9,6 +9,7 @@
 3. Для работы программы необходимо вставить Cookie в формате json с [lolz.guru](https://lolz.guru) в файл cookie.txt (Можно использовать [EditThisCookie](https://bit.ly/EditThisCookielzt)).
 4. + Для Windows: Запустить двойным нажатием файл main.py
    + Для Linux: Программа пока не работает на Linux. В скором времени планируется добавить поддержку Linux.
+Можно настроить авто запуск в файле config.py.
 
 Связь со мной - https://t.me/meldone  
 Спонсировать - https://qiwi.com/n/JUSLA090
