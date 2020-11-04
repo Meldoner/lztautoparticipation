@@ -11,12 +11,18 @@ import base64
 from selenium.common.exceptions import NoSuchElementException
 import cookies
 import sys
-import shutil
 import json
 import config
 
 
-print('Версия: 0.03')
+version = 0.04
+
+response = requests.get('https://api.github.com/repos/meldoner/lztautoparticipation/releases/latest')
+latestjson = response.json()
+latestver = latestjson['tag_name']
+latestver = float(latestver)
+
+
 
 try:
 	waiting = config.waiting * 60
@@ -29,8 +35,6 @@ except:
 
 def work():
 
-	shutil.rmtree('chromedata', ignore_errors=True)
-
 	url = 'https://lolz.guru/forums/contests/'
 
 	if cookies.cookies[0] == {}:
@@ -38,18 +42,18 @@ def work():
 		time.sleep(5)
 		sys.exit()
 
-	time.sleep(0.2)
 
 	options = Options()
-	options.add_argument('--headless')
 	options.add_argument('--log-level=3')
 	driver = webdriver.Chrome(chrome_options=options, executable_path=r'chromedriver.exe')
 	os.system("cls")
+	if latestver == version:
+		print('У вас последняя версия программы - ' + str(version) + '.')
+	else:
+		print('У вас устаревшая версия программы - ' + str(version) + '. Последняя версия программы - ' + str(latestver) + '.')
 	driver.set_window_size(1920,1080)
 	driver.set_window_position(0,0)
 	driver.get(url)
-
-
 
 
 	cooknum = 0
@@ -57,52 +61,43 @@ def work():
 		driver.add_cookie(cookies.cookies[cooknum])
 		cooknum = cooknum + 1
 
-	time.sleep(0.2)
+	time.sleep(0.3)
 
 	print('\nПриветствую вас в боте!')
 
-	SCROLL_PAUSE_TIME = 1.5
 
-	last_height = driver.execute_script("return document.body.scrollHeight")
+	flags = driver.find_element_by_css_selector('a.OverlayTrigger.button.Tooltip').get_attribute("href")
 
-	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+	if flags == 'https://lolz.guru/account/set-viewed-contests-visibility':
+		driver.find_element_by_css_selector('a.OverlayTrigger.button.Tooltip').click()
+		time.sleep(0.5)
+		driver.refresh()
 
-	time.sleep(1)
+	print('\nНачинаю работу')
 
-	driver.refresh()
-	time.sleep(1)
+	page = 1
 
-	print('\nНачинаю работу!\n')
+	numofpages = driver.find_element_by_xpath('//*[@id="content"]/div/div/div/div/div[2]/div[2]').get_attribute("data-last")
+	print('Кол-во страниц розыгрыша = ' + str(numofpages))
 
-	while True:
-	    # Scroll down to bottom
-	    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-	    # Wait to load page
-	    time.sleep(SCROLL_PAUSE_TIME)
-
-	    # Calculate new scroll height and compare with last scroll height
-	    new_height = driver.execute_script("return document.body.scrollHeight")
-	    if new_height == last_height:
-	        break
-	    last_height = new_height
-
-
-
-	time.sleep(1)
-
-	threads = driver.find_elements_by_xpath("//div[not(.//a//h3//i)][contains(@class, 'discussionListItem')]//a[contains(@class, 'PreviewTooltip')]")
-
-	print('Достаю ссылки.\n')
-
-	time.sleep(0.3)
+	print('\nДостаю ссылки')
 
 	links = []
-	for elem in threads:
-		time.sleep(0.01)
-		link = elem.get_attribute('href')
-		links.append(link)
-		print(elem.get_attribute('href'))
+	
+	for get_links in range(int(numofpages)):
+		driver.get('https://lolz.guru/forums/contests/page-' + str(page))
+
+		threads = driver.find_elements_by_xpath("//div[not(.//a//h3//i)][contains(@class, 'discussionListItem')]//a[contains(@class, 'PreviewTooltip')]")
+
+		for elem in threads:
+			time.sleep(0.01)
+			link = elem.get_attribute('href')
+			links.append(link)
+			print(elem.get_attribute('href'))
+
+		page = page + 1
+
+
 
 
 	sumlist = len(links)
@@ -117,8 +112,6 @@ def work():
 	time.sleep(0.3)
 	for i in range(sumlist):
 		goto = links[h]
-		driver.execute_script("window.open('');")
-		driver.switch_to.window(driver.window_handles[1])
 		driver.get(goto)
 		print("%s" %driver.title)
 
@@ -154,12 +147,12 @@ def work():
 
 				driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
+				time.sleep(0.1)
+
 				gg = driver.find_element_by_xpath("//div[contains(@class, 'ddText')]//img")
 
 				srcimg = gg.get_attribute("src")
 				print('Считываю капчу!\n')
-
-				time.sleep(0.3)
 
 				srcimg = srcimg[23:]
 
@@ -169,59 +162,59 @@ def work():
 				with open('captcha.jpg', 'wb') as f:
 			   		f.write(data)
 
-				time.sleep(0.1)
-
 
 				filename = 'captcha.jpg'
 
-				image = Image.open('captcha.jpg')
+				image_to_crop = Image.open('captcha.jpg', 'r')
+				image = image_to_crop.crop((-1, 8, 65, 22))
+				image.save('cropcaptcha.png')
 
-				width = 300
-				height = 90
+			
+
+
+				image = Image.open('cropcaptcha.png', 'r')
+				pixels = list(image.getdata())
+				new_pixels_list = []
+				for rgb in pixels:
+				    if rgb[0] < 160:
+				        rgb = (0, 0, 0)
+				    if rgb[0] > 160:
+				        rgb = (255, 255, 255)
+				    new_pixels_list.append(rgb)
+				image.putdata(new_pixels_list)
+				image.save('captchanormal.png')
+
+
+				image = Image.open('captchanormal.png')
+				width = 198
+				height = 42
 				resized_img = image.resize((width, height), Image.ANTIALIAS)
-				resized_img.save('captchax2.5.jpg')
-
-				time.sleep(0.3)
-
-				imgx3 = Image.open('captchax2.5.jpg')
-
-				pytesseract.pytesseract.tesseract_cmd = r'Tesseract-OCR\tesseract.exe'
+				resized_img.save('captchanormalx.png')
 
 
-				text = pytesseract.image_to_string(imgx3, config='--psm 6 -c tessedit_char_whitelist=0123456789?+')
 
-				text = text[:-2]
+				imgt = Image.open('captchanormalx.png')
 
-				print('\nКапча = ' + text)
+				pytesseract.pytesseract.tesseract_cmd = r'Tesseract-OCR\\tesseract.exe'
+
+				time.sleep(0.1)
+
+				text = pytesseract.image_to_string(imgt, config='--psm 10 --oem 1 -c tessedit_char_whitelist=0123456789+?')
+
+				text = text.split('\n')[0]
 
 				text = text.replace('?','')
 
-				text = text.replace('+',' ')
+				print('Капча = ' + text)
 
-				text_chars = sum(len(word) for word in text)
+				firstpart = int(text.split('+')[0])
 
+				secondpart = int(text.split('+')[1])
 
-				if text_chars == 5:
-					a = int(text[:-2])
-					b = int(text[2:])
-					result = a + b
-					print('Ответ: ' + str(result) + '\n')
+				result =  firstpart + secondpart
 
-				elif text_chars == 4:
-					a = int(text[:-2])
-					b = int(text[2:])
-					result = a + b
-					print('Ответ: ' + str(result) + '\n')
+				print('\nОтвет = ' + str(result) + '\n')
 
-				elif text_chars == 3:
-					a = int(text[:-1])
-					b = int(text[1:])
-					result = a + b
-					print('Ответ: ' + str(result) + '\n')
-
-				else:
-					print('Не удалось считать капчу')
-					result = 0
 
 				time.sleep(0.01)
 
@@ -230,13 +223,13 @@ def work():
 				driver.find_element_by_class_name('LztContest--Participate').click()
 
 					
-				os.remove('captcha.jpg')
-				os.remove('captchax2.5.jpg')
-				time.sleep(0.3)
+				
+				time.sleep(2)
+
 
 				try:
-					driver.find_element_by_class_name('LztContest--alreadyParticipating hidden')
-				except:
+					driver.find_element_by_css_selector('div.baseHtml.errorDetails')
+				except NoSuchElementException:
 					return True
 				return False
 				
@@ -245,23 +238,20 @@ def work():
 
 			if try_again == False:
 				print('Капча не верна! Пробую ещё раз.\n')
+				driver.find_element_by_class_name('OverlayCloser').click()
 				captcha_solution()
 			else:
 				print('Капча успешно введена!\n')
 				pass
 
 
-			driver.close()
-			driver.switch_to.window(driver.window_handles[0])
-
 
 			h = h + 1
 
 
 		else:
-			driver.close()
-			driver.switch_to.window(driver.window_handles[0])
-			print('Вы не можете участвовать в розыгрыше.\n')
+			erorr = driver.find_element_by_css_selector('div.error.mn-15-0-0').text
+			print(erorr + '\n')
 
 			h = h + 1
 
@@ -280,7 +270,6 @@ def work():
 		pass
 
 	time.sleep(2)
-	shutil.rmtree('chromedata', ignore_errors=True)
 
 
 try:
@@ -293,11 +282,19 @@ except:
 
 if auto_start == 0:
 	work()
+	os.remove('captchanormalx.png')
+	os.remove('captchanormal.png')
+	os.remove('captcha.jpg')
+	os.remove('cropcaptcha.png')
 	sys.exit()
 
 
 while auto_start == 1:
 		work()
+		os.remove('captchanormalx.png')
+		os.remove('captchanormal.png')
+		os.remove('captcha.jpg')
+		os.remove('cropcaptcha.png')
 		time.sleep(waiting)
 
 
